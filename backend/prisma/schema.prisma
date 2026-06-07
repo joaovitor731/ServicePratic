@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusOS {
+  ABERTA
+  EM_ANALISE
+  EM_EXECUCAO
+  FINALIZADA
+  CANCELADA
+}
+
+model Usuario {
+  id       Int                      @id @default(autoincrement())
+  nome     String
+  email    String                   @unique
+  senha_hash String
+  ativo    Boolean                  @default(true)
+  historico HistoricoOrdemServico[]
+}
+
+model Cliente {
+  id        Int             @id @default(autoincrement())
+  nome      String
+  telefone  String
+  email     String
+  endereco  String
+  observacao String
+  equipamentos Equipamento[]
+  ordensServico OrdemServico[]
+}
+
+model Equipamento {
+  id              Int            @id @default(autoincrement())
+  cliente_id      Int
+  tipo            String
+  marca           String
+  modelo          String
+  numero_serie    String
+  defeito_relatado String
+  cliente         Cliente        @relation(fields: [cliente_id], references: [id])
+  ordensServico   OrdemServico[]
+}
+
+model Servico {
+  id            Int                 @id @default(autoincrement())
+  nome          String              @unique
+  descricao     String
+  valor_padrao  Decimal             @db.Decimal(10, 2)
+  ativo         Boolean             @default(true)
+  itens         OrdemServicoItem[]
+}
+
+model OrdemServico {
+  id              Int                      @id @default(autoincrement())
+  numero          String                   @unique
+  cliente_id      Int
+  equipamento_id  Int
+  problema_relatado String
+  status          StatusOS                @default(ABERTA)
+  data_abertura   DateTime                @default(now())
+  data_fechamento DateTime?
+  valor_total     Decimal                 @db.Decimal(10, 2) @default(0)
+  cliente         Cliente                 @relation(fields: [cliente_id], references: [id])
+  equipamento     Equipamento             @relation(fields: [equipamento_id], references: [id])
+  historico       HistoricoOrdemServico[]
+  itens           OrdemServicoItem[]
+}
+
+model OrdemServicoItem {
+  id                Int            @id @default(autoincrement())
+  ordem_servico_id  Int
+  servico_id        Int
+  quantidade        Int
+  valor_unitario    Decimal        @db.Decimal(10, 2)
+  subtotal          Decimal        @db.Decimal(10, 2)
+  ordemServico      OrdemServico    @relation(fields: [ordem_servico_id], references: [id], onDelete: Cascade)
+  servico           Servico        @relation(fields: [servico_id], references: [id], onDelete: Restrict)
+
+  @@index([ordem_servico_id])
+  @@index([servico_id])
+}
+
+model HistoricoOrdemServico {
+  id               Int       @id @default(autoincrement())
+  ordem_servico_id Int
+  usuario_id       Int
+  status_anterior  StatusOS
+  status_novo      StatusOS
+  observacao       String
+  data_evento      DateTime  @default(now())
+  ordemServico     OrdemServico @relation(fields: [ordem_servico_id], references: [id], onDelete: Cascade)
+  usuario          Usuario      @relation(fields: [usuario_id], references: [id])
+}
