@@ -1,0 +1,44 @@
+{
+  "name": "servicepratic-backend",
+  "version": "1.0.0",
+  "description": "Backend do ServicePratic - Sistema de gerenciamento de ordens de serviço",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "prisma:format": "prisma format",
+    "db:start": "docker compose up -d mysql",
+    "db:stop": "docker compose down",
+    "start": "node dist/server.js",
+    "lint": "eslint 'src/**/*.{ts,js}'",
+    "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
+    "format": "prettier --write src"
+  },
+  "keywords": ["service", "order", "management"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "dotenv": "^16.3.1",
+    "@prisma/client": "^5.3.1"
+  },
+  "devDependencies": {
+    "typescript": "5.2.2",
+    "@types/express": "^4.17.18",
+    "@types/node": "^20.5.7",
+    "@types/cors": "^2.8.14",
+    "ts-node-dev": "^2.0.0",
+    "ts-node": "^10.9.1",
+    "prisma": "^5.3.1",
+    "eslint": "^8.48.0",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "prettier": "^3.0.3"
+  }
+}

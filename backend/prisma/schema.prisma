@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusOS {
+  ABERTA
+  EM_ANALISE
+  EM_EXECUCAO
+  FINALIZADA
+  CANCELADA
+}
+
+model Usuario {
+  id       Int                      @id @default(autoincrement())
+  nome     String
+  email    String                   @unique
+  senha_hash String
+  ativo    Boolean                  @default(true)
+  historico HistoricoOrdemServico[]
+}
+
+model Cliente {
+  id        Int             @id @default(autoincrement())
+  nome      String
+  telefone  String
+  email     String
+  endereco  String
+  observacao String
+  equipamentos Equipamento[]
+  ordensServico OrdemServico[]
+}
+
+model Equipamento {
+  id              Int            @id @default(autoincrement())
+  cliente_id      Int
+  tipo            String
+  marca           String
+  modelo          String
+  numero_serie    String
+  defeito_relatado String
+  cliente         Cliente        @relation(fields: [cliente_id], references: [id])
+  ordensServico   OrdemServico[]
+}
+
+model OrdemServico {
+  id              Int                      @id @default(autoincrement())
+  numero          String                   @unique
+  cliente_id      Int
+  equipamento_id  Int
+  problema_relatado String
+  status          StatusOS                @default(ABERTA)
+  data_abertura   DateTime                @default(now())
+  data_fechamento DateTime?
+  cliente         Cliente                 @relation(fields: [cliente_id], references: [id])
+  equipamento     Equipamento             @relation(fields: [equipamento_id], references: [id])
+  historico       HistoricoOrdemServico[]
+}
+
+model HistoricoOrdemServico {
+  id               Int       @id @default(autoincrement())
+  ordem_servico_id Int
+  usuario_id       Int
+  status_anterior  StatusOS
+  status_novo      StatusOS
+  observacao       String
+  data_evento      DateTime  @default(now())
+  ordemServico     OrdemServico @relation(fields: [ordem_servico_id], references: [id])
+  usuario          Usuario      @relation(fields: [usuario_id], references: [id])
+}
